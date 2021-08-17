@@ -6,7 +6,7 @@ import "./styles.css";
 export default class NewBlogPost extends Component {
   constructor(props) {
     super(props);
-    this.state = { text: "" };
+    this.state = { text: "", title: "" };
     this.handleChange = this.handleChange.bind(this);
   }
 
@@ -14,13 +14,21 @@ export default class NewBlogPost extends Component {
     this.setState({ text: value });
   }
 
+  handleChangeTitle(value) {
+    this.setState({ title: value });
+  }
   render() {
     return (
       <Container className="new-blog-container">
         <Form className="mt-5">
           <Form.Group controlId="blog-form" className="mt-3">
             <Form.Label>Title</Form.Label>
-            <Form.Control size="lg" placeholder="Title" />
+            <Form.Control
+              // onChange={this.handleChangeTitle}
+              // value={this.state.title}
+              size="lg"
+              placeholder="Title"
+            />
           </Form.Group>
           <Form.Group controlId="blog-category" className="mt-3">
             <Form.Label>Category</Form.Label>
