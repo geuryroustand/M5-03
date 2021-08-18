@@ -1,19 +1,30 @@
 import express from "express";
+import { v2 as cloudinary } from "cloudinary";
+import { CloudinaryStorage } from "multer-storage-cloudinary";
 
-import { saveImgPost, saveImgAuthor } from "../readUndWriteFiles/index.js";
 import multer from "multer";
 
 const filesRouter = express();
 
-filesRouter.post("/", multer().single("profilePic"), async (req, res, next) => {
-  try {
-    await saveImgPost(req.file.originalname, req.file.buffer);
-    console.log(req.file);
-    res.send("Uploaded");
-  } catch (error) {
-    next(error);
-  }
+const saveImg = new CloudinaryStorage({
+  cloudinary,
+  params: {
+    folder: "imgs-blog-post",
+  },
 });
+
+filesRouter.post(
+  "/",
+  multer({ storage: saveImg }).single("profilePic"),
+  async (req, res, next) => {
+    try {
+      console.log(req.file);
+      res.send("Uploaded");
+    } catch (error) {
+      next(error);
+    }
+  }
+);
 
 filesRouter.post("/:pic", multer().single("pic"), async (req, res, next) => {
   try {

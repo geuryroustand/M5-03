@@ -1,5 +1,8 @@
 import express from "express";
 import uniqid from "uniqid";
+import { v2 as cloudinary } from "cloudinary";
+import { CloudinaryStorage } from "multer-storage-cloudinary";
+import multer from "multer";
 
 import { getAuthors, writeAuthors } from "../readUndWriteFiles/index.js";
 
@@ -84,5 +87,53 @@ authorRouter.put("/:idAuthor", async (req, res, next) => {
     next(error);
   }
 });
+
+const saveImagInStorage = new CloudinaryStorage({
+  cloudinary,
+  params: {
+    folder: "imgs-blog-post",
+  },
+});
+
+authorRouter.put(
+  "/:profilId/cover",
+  multer({ storage: saveImagInStorage }).single("cover"),
+  async (req, res, next) => {
+    try {
+      const authors = await getAuthors();
+
+      const restOfAuthors = authors.filter(
+        (author) => author.id !== req.params.profilId
+      );
+
+      const upgradeAuthor = authors.find(
+        (author) => author.id === req.params.profilId
+      );
+
+      if (!upgradeAuthor) {
+        console.log(`Author with ${req.params.id} is not found!`);
+        res.send(`Author with ${req.params.id} is not found!`);
+        req.status(404).send({
+          message: `Author with ${req.params.id} is not found!`,
+        });
+      }
+
+      const newAuthor = {
+        ...upgradeAuthor,
+        cover: req.file.path,
+        upgradedAt: new Date(),
+        id: req.params.profilId,
+      };
+
+      restOfAuthors.push(newAuthor);
+
+      await writeAuthors(restOfAuthors);
+
+      res.send(newAuthor);
+    } catch (error) {
+      next(error);
+    }
+  }
+);
 
 export default authorRouter;
